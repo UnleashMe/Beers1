@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:background="@color/amber">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/nameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -30,7 +31,7 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
         android:paddingBottom="8dp"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/showDescImage"
         app:layout_constraintTop_toTopOf="@+id/nameText"
@@ -38,15 +39,38 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/description"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="14sp"
         android:textStyle="italic"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/price"
         tools:text="Его вкус напоминает филе хариуса. Омуль обладает нежным мясом, которое его отличает от других представителей рода сиговых. Однажды попробовав его на вкус, вы сможете с легкостью определить, какую рыбу съели: омуль или подделку." />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/alcoholPercentageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="@+id/nameText"
+        app:layout_constraintTop_toBottomOf="@+id/description"
+        tools:text="Содержание алкоголя: 9.8%" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/volumeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="@+id/showDescImage"
+        app:layout_constraintTop_toBottomOf="@+id/description"
+        tools:text="Объем 0.5 Л" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

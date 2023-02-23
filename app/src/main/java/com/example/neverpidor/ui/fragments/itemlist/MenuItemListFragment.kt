@@ -31,12 +31,25 @@ class MenuItemListFragment: BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val controller = MenuItemListEpoxyController(args.itemId)
-        viewModel.getSnacks()
-        viewModel.snacks.observe(viewLifecycleOwner) {
-            controller.snacks = it
+        controller.isLoading = true
+        when (args.itemId ) {
+            0 -> {
+                viewModel.getBeers()
+                viewModel.beers.observe(viewLifecycleOwner) {
+                    controller.beerList = it
+                }
+            }
+            1 -> {
+                viewModel.getSnacks()
+
+                viewModel.snacks.observe(viewLifecycleOwner) {
+                    controller.snacks = it
+                }
+            }
+
         }
 
-        Log.e("MenuFragment", args.itemId.toString())
+
         binding.itemListRv.setControllerAndBuildModels(controller)
 
 

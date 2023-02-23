@@ -1,91 +1,150 @@
 package com.example.neverpidor.ui.fragments.itemlist
 
+import android.graphics.Color
+import android.icu.text.Normalizer2.Mode
 import androidx.core.view.isGone
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.airbnb.epoxy.EpoxyController
 import com.example.neverpidor.R
-import com.example.neverpidor.databinding.ModelSnackBinding
-import com.example.neverpidor.databinding.ModelSnackTypeBinding
-import com.example.neverpidor.model.Beverage
-import com.example.neverpidor.model.Data
-import com.example.neverpidor.model.Snack
-import com.example.neverpidor.model.SnackList
+import com.example.neverpidor.databinding.DividerBinding
+import com.example.neverpidor.databinding.ModelItemTypeBinding
+import com.example.neverpidor.databinding.ModelLoadingDataScreenBinding
+import com.example.neverpidor.databinding.ModelMenuItemBinding
+import com.example.neverpidor.model.beer.BeerList
+import com.example.neverpidor.model.snack.SnackList
 import com.example.neverpidor.ui.epoxy.ViewBindingKotlinModel
+import kotlin.random.Random
 
 class MenuItemListEpoxyController(val id: Int) : EpoxyController() {
 
+    var isLoading = true
+
+    // snacks layer
     var snacks = SnackList()
         set(value) {
             field = value
+            isLoading = false
             requestModelBuild()
         }
-    var drinks = listOf<Beverage>()
-    var isShown = ""
-    set(value) {
-        if (value == field) {
-            field = ""
-            requestModelBuild()
-        } else {
+
+    private var isShown = ""
+        set(value) {
+            if (value == field) {
+                field = ""
+                requestModelBuild()
+            } else {
+                field = value
+                requestModelBuild()
+            }
+        }
+
+    //beer layer
+    var beerList = BeerList()
+        set(value) {
             field = value
+            isLoading = false
             requestModelBuild()
         }
-    }
 
 
     override fun buildModels() {
 
+        if (isLoading) {
+            LoadingScreenEpoxyModel().id("Loading").addTo(this)
+            return
+        }
         when (id) {
-            1 -> {
-
-                snacks.data.groupBy { it.type }.forEach { map ->
-                    SnackTypeEpoxyModel(map.key) { string ->
+            0 -> {
+                beerList.data.groupBy { it.type }.forEach { map ->
+                    ItemTypeEpoxyModel(map.key) { string ->
                         isShown = string
 
                     }.id(map.key.hashCode()).addTo(this)
-
+                    DividerEpoxy( R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
                     map.value.filter { it.type == isShown }.forEach {
-                        SnackEpoxyModel(it).id(it.UID).addTo(this)
+                        MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
+                        DividerEpoxy( R.color.black).id(Random.nextDouble(100.0)).addTo(this)
                     }
+                }
+            }
+            1 -> {
+                snacks.data.groupBy { it.type }.forEach { map ->
+                    ItemTypeEpoxyModel(map.key) { string ->
+                        isShown = string
 
+                    }.id(map.key.hashCode()).addTo(this)
+                    DividerEpoxy( R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
+                    map.value.filter { it.type == isShown }.forEach {
+                        MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
+                        DividerEpoxy( R.color.black).id(Random.nextDouble(100.0)).addTo(this)
+                    }
                 }
             }
         }
+
     }
 
-    data class SnackTypeEpoxyModel(val type: String, val onTypeClick: (String) -> Unit) :
-        ViewBindingKotlinModel<ModelSnackTypeBinding>(R.layout.model_snack_type) {
-        override fun ModelSnackTypeBinding.bind() {
+    class LoadingScreenEpoxyModel(): ViewBindingKotlinModel<ModelLoadingDataScreenBinding>(R.layout.model_loading_data_screen) {
+        override fun ModelLoadingDataScreenBinding.bind() {
+
+        }
+
+    }
+
+    data class ItemTypeEpoxyModel(val type: String, val onTypeClick: (String) -> Unit) :
+        ViewBindingKotlinModel<ModelItemTypeBinding>(R.layout.model_item_type) {
+        override fun ModelItemTypeBinding.bind() {
             typeText.text = type
             root.setOnClickListener {
                 onTypeClick(type)
             }
         }
-
     }
 
-    data class SnackEpoxyModel(val data: Data) :
-        ViewBindingKotlinModel<ModelSnackBinding>(R.layout.model_snack) {
-        override fun ModelSnackBinding.bind() {
+    data class MenuItemEpoxyModel(val data: com.example.neverpidor.model.beer.Data, val id: Int) :
+        ViewBindingKotlinModel<ModelMenuItemBinding>(R.layout.model_menu_item) {
+        override fun ModelMenuItemBinding.bind() {
             nameText.text = data.name
-
+            description.isGone = true
+            alcoholPercentageText.isGone = true
+            volumeText.isGone = true
             price.text = "${data.price} P."
             var closed: Boolean = true
             showDescImage.setOnClickListener {
+                when (id) {
+                    0 -> {
+                        if (closed) {
+                            description.isVisible = true
+                            description.text = data.description
+                            alcoholPercentageText.isVisible = true
+                            alcoholPercentageText.text = "Содержание алкоголя ${data.alcPercentage}%"
+                            volumeText.isVisible = true
+                            volumeText.text = "Объем: ${data.volume} Л"
 
-                if (closed) {
-                    this.description.isVisible = true
-                    this.description.text = data.description
-                } else {
-                    this.description.isGone = true
+                        } else {
+                            description.isGone = true
+                            alcoholPercentageText.isGone = true
+                            volumeText.isGone = true
+                        }
+                        closed = !closed
+                    }
+                    1 -> {
+                        if (closed) {
+                            description.isVisible = true
+                            description.text = data.description
+                        } else {
+                            description.isGone = true
+                        }
+                        closed = !closed
+                    }
                 }
-                closed = !closed
-
             }
-
         }
-
     }
-
+    data class DividerEpoxy(val color: Int): ViewBindingKotlinModel<DividerBinding>(R.layout.divider) {
+        override fun DividerBinding.bind() {
+            divideLine.setBackgroundResource(color)
+        }
+    }
 
 }

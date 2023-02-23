@@ -1,15 +1,18 @@
 package com.example.neverpidor.network
 
 import android.util.Log
-import android.widget.Toast
-import com.example.neverpidor.model.Snack
-import com.example.neverpidor.model.SnackList
+import com.example.neverpidor.model.beer.BeerList
+import com.example.neverpidor.model.snack.SnackList
 import retrofit2.Response
 
 class ApiClient(private val beersApiService: BeersApiService) {
 
     suspend fun getSnacks(): SimpleResponse<SnackList> {
         return safeApiCall { beersApiService.getSnacks() }
+    }
+
+    suspend fun getBeers(): SimpleResponse<BeerList> {
+        return safeApiCall { beersApiService.getBeers() }
     }
 
     private inline fun <T> safeApiCall(apiCall: () -> Response<T>): SimpleResponse<T> {
