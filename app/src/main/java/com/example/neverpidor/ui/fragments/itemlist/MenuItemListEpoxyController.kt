@@ -2,6 +2,7 @@ package com.example.neverpidor.ui.fragments.itemlist
 
 import android.graphics.Color
 import android.icu.text.Normalizer2.Mode
+import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.airbnb.epoxy.EpoxyController
@@ -15,7 +16,8 @@ import com.example.neverpidor.model.snack.SnackList
 import com.example.neverpidor.ui.epoxy.ViewBindingKotlinModel
 import kotlin.random.Random
 
-class MenuItemListEpoxyController(val id: Int) : EpoxyController() {
+class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit) :
+    EpoxyController() {
 
     var isLoading = true
 
@@ -56,47 +58,55 @@ class MenuItemListEpoxyController(val id: Int) : EpoxyController() {
         when (id) {
             0 -> {
                 beerList.data.groupBy { it.type }.forEach { map ->
-                    ItemTypeEpoxyModel(map.key) { string ->
+                    ItemTypeEpoxyModel(map.key, onTypeClick = { string ->
                         isShown = string
-
+                    }) {
+                        onAddClick(it)
                     }.id(map.key.hashCode()).addTo(this)
-                    DividerEpoxy( R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
+                    DividerEpoxy(R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
                     map.value.filter { it.type == isShown }.forEach {
                         MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
-                        DividerEpoxy( R.color.black).id(Random.nextDouble(100.0)).addTo(this)
+                        DividerEpoxy(R.color.black).id(Random.nextDouble(100.0)).addTo(this)
                     }
                 }
             }
             1 -> {
                 snacks.data.groupBy { it.type }.forEach { map ->
-                    ItemTypeEpoxyModel(map.key) { string ->
+                    ItemTypeEpoxyModel(map.key, onTypeClick = { string ->
                         isShown = string
+                    }) {
 
                     }.id(map.key.hashCode()).addTo(this)
-                    DividerEpoxy( R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
+                    DividerEpoxy(R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
                     map.value.filter { it.type == isShown }.forEach {
                         MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
-                        DividerEpoxy( R.color.black).id(Random.nextDouble(100.0)).addTo(this)
+                        DividerEpoxy(R.color.black).id(Random.nextDouble(100.0)).addTo(this)
                     }
                 }
             }
         }
-
     }
 
-    class LoadingScreenEpoxyModel(): ViewBindingKotlinModel<ModelLoadingDataScreenBinding>(R.layout.model_loading_data_screen) {
+    class LoadingScreenEpoxyModel :
+        ViewBindingKotlinModel<ModelLoadingDataScreenBinding>(R.layout.model_loading_data_screen) {
         override fun ModelLoadingDataScreenBinding.bind() {
 
         }
-
     }
 
-    data class ItemTypeEpoxyModel(val type: String, val onTypeClick: (String) -> Unit) :
+    data class ItemTypeEpoxyModel(
+        val type: String,
+        val onTypeClick: (String) -> Unit,
+        val onAddClick: (String) -> Unit
+    ) :
         ViewBindingKotlinModel<ModelItemTypeBinding>(R.layout.model_item_type) {
         override fun ModelItemTypeBinding.bind() {
             typeText.text = type
             root.setOnClickListener {
                 onTypeClick(type)
+            }
+            addImage.setOnClickListener {
+                onAddClick(type)
             }
         }
     }
@@ -106,45 +116,45 @@ class MenuItemListEpoxyController(val id: Int) : EpoxyController() {
         override fun ModelMenuItemBinding.bind() {
             nameText.text = data.name
             description.isGone = true
+            showDescImage.setImageResource(R.drawable.ic_baseline_open_in_full_24)
             alcoholPercentageText.isGone = true
             volumeText.isGone = true
             price.text = "${data.price} P."
             var closed: Boolean = true
             showDescImage.setOnClickListener {
-                when (id) {
-                    0 -> {
-                        if (closed) {
-                            description.isVisible = true
-                            description.text = data.description
+
+                if (closed) {
+                    when (id) {
+                        0 -> {
                             alcoholPercentageText.isVisible = true
-                            alcoholPercentageText.text = "Содержание алкоголя ${data.alcPercentage}%"
+                            alcoholPercentageText.text =
+                                "Содержание алкоголя ${data.alcPercentage}%"
                             volumeText.isVisible = true
                             volumeText.text = "Объем: ${data.volume} Л"
+                        }
+                    }
+                    description.isVisible = true
+                    description.text = data.description
 
-                        } else {
-                            description.isGone = true
-                            alcoholPercentageText.isGone = true
-                            volumeText.isGone = true
-                        }
-                        closed = !closed
-                    }
-                    1 -> {
-                        if (closed) {
-                            description.isVisible = true
-                            description.text = data.description
-                        } else {
-                            description.isGone = true
-                        }
-                        closed = !closed
-                    }
+                    showDescImage.setImageResource(R.drawable.ic_baseline_close_fullscreen_24)
+                } else {
+                    description.isGone = true
+                    alcoholPercentageText.isGone = true
+                    volumeText.isGone = true
+                    showDescImage.setImageResource(R.drawable.ic_baseline_open_in_full_24)
                 }
+                closed = !closed
             }
-        }
-    }
-    data class DividerEpoxy(val color: Int): ViewBindingKotlinModel<DividerBinding>(R.layout.divider) {
-        override fun DividerBinding.bind() {
-            divideLine.setBackgroundResource(color)
-        }
-    }
 
+        }
+    }
 }
+
+
+data class DividerEpoxy(val color: Int) :
+    ViewBindingKotlinModel<DividerBinding>(R.layout.divider) {
+    override fun DividerBinding.bind() {
+        divideLine.setBackgroundResource(color)
+    }
+}
+

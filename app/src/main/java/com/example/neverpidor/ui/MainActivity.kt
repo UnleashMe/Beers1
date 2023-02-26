@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+       // supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val toggle = ActionBarDrawerToggle(
             this,
             binding.drawerLayout,
@@ -37,15 +37,11 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.container) as NavHostFragment
         navController = navHostFragment.navController
-        NavigationUI.setupActionBarWithNavController(this, navController)
-    //    setupActionBarWithNavController(navController, binding.drawerLayout)
+     //   NavigationUI.setupActionBarWithNavController(this, navController)
+      //  setupActionBarWithNavController(navController, binding.drawerLayout)
         binding.navView.setupWithNavController(navController)
 
         toggle.syncState()
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
     override fun onDestroy() {

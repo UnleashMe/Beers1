@@ -16,7 +16,7 @@ object NetworkLayer {
         .baseUrl(baseUrl)
         .build()
 
-    val retrofitService: BeersApiService by lazy { retrofit.create(BeersApiService::class.java) }
+    private val retrofitService: BeersApiService by lazy { retrofit.create(BeersApiService::class.java) }
 
     val apiClient = ApiClient(retrofitService)
 }

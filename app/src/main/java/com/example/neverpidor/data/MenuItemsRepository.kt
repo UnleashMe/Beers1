@@ -1,6 +1,7 @@
 package com.example.neverpidor.data
 
 import com.example.neverpidor.model.beer.BeerList
+import com.example.neverpidor.model.beer.BeerRequest
 import com.example.neverpidor.model.snack.SnackList
 import com.example.neverpidor.network.NetworkLayer
 
@@ -30,4 +31,5 @@ class MenuItemsRepository {
         }
         return request.body
     }
+    suspend fun addBeer(beerRequest: BeerRequest) = NetworkLayer.apiClient.addBeer(beerRequest)
 }
