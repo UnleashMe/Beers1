@@ -2,6 +2,7 @@ package com.example.neverpidor.network
 
 import android.util.Log
 import com.example.neverpidor.model.beer.BeerList
+import com.example.neverpidor.model.beer.BeerPostResponse
 import com.example.neverpidor.model.beer.BeerRequest
 import com.example.neverpidor.model.snack.SnackList
 import retrofit2.Call
@@ -17,7 +18,7 @@ class ApiClient(private val beersApiService: BeersApiService) {
         return safeApiCall { beersApiService.getBeers() }
     }
 
-    suspend fun addBeer(beerRequest: BeerRequest): Call<BeerRequest> = beersApiService.addBeer(beerRequest)
+    suspend fun addBeer(beerRequest: BeerRequest): Response<BeerPostResponse> = beersApiService.addBeer(beerRequest)
 
     private inline fun <T> safeApiCall(apiCall: () -> Response<T>): SimpleResponse<T> {
         return try {

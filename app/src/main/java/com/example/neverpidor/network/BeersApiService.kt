@@ -1,6 +1,7 @@
 package com.example.neverpidor.network
 
 import com.example.neverpidor.model.beer.BeerList
+import com.example.neverpidor.model.beer.BeerPostResponse
 import com.example.neverpidor.model.beer.BeerRequest
 import com.example.neverpidor.model.snack.SnackList
 import retrofit2.Call
@@ -18,5 +19,5 @@ interface BeersApiService {
     suspend fun getBeers(): Response<BeerList>
 
     @POST("beverages/add-beverage")
-    fun addBeer(@Body beerRequest: BeerRequest): Call<BeerRequest>
+    suspend fun addBeer(@Body beerRequest: BeerRequest): Response<BeerPostResponse>
 }

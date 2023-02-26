@@ -6,7 +6,7 @@ import com.example.neverpidor.data.MenuCategoryEntity
 import com.example.neverpidor.databinding.ModelPreviewBinding
 import com.example.neverpidor.ui.epoxy.ViewBindingKotlinModel
 
-class ListEpoxyController(val onClick: (Int) -> Unit) : EpoxyController() {
+class ListEpoxyController(private val onClick: (Int) -> Unit) : EpoxyController() {
 
     var list: List<MenuCategoryEntity> = listOf()
 

@@ -12,7 +12,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import com.example.neverpidor.R
 import com.example.neverpidor.databinding.AddBeerDialogBinding
 import com.example.neverpidor.databinding.FragmentMenuItemListBinding
 import com.example.neverpidor.model.beer.BeerRequest
@@ -21,11 +20,11 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MenuItemListFragment: BaseFragment() {
+class MenuItemListFragment : BaseFragment() {
 
     private var _binding: FragmentMenuItemListBinding? = null
     private val binding: FragmentMenuItemListBinding
-    get() = _binding!!
+        get() = _binding!!
     private val args: MenuItemListFragmentArgs by navArgs()
     private val viewModel: MenuItemListViewModel by viewModels()
 
@@ -45,7 +44,7 @@ class MenuItemListFragment: BaseFragment() {
             showAddBeerDialog(it)
         }
         controller.isLoading = true
-        when (args.itemId ) {
+        when (args.itemId) {
             0 -> {
                 viewModel.getBeers()
                 viewModel.beers.observe(viewLifecycleOwner) {
@@ -60,18 +59,24 @@ class MenuItemListFragment: BaseFragment() {
             }
         }
         viewModel.beerResponse.observe(viewLifecycleOwner) {
-            it.enqueue(object : Callback<BeerRequest> {
-                override fun onResponse(call: Call<BeerRequest>, response: Response<BeerRequest>) {
-                    Toast.makeText(requireContext(), "Пиво добавлено", Toast.LENGTH_SHORT).show()
-                }
-                override fun onFailure(call: Call<BeerRequest>, t: Throwable) {
-                    Toast.makeText(requireContext(), t.message ?: "Failed", Toast.LENGTH_LONG).show()
-                    Log.e("FAIL", t.message ?: "fuck")
-                }
-            })
+            if (it.isSuccessful) {
+                Toast.makeText(
+                    requireContext(),
+                    "${it.body()?.msg}, ${it.body()?.createdBeverage?.name}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG).show()
+            }
+
         }
         binding.itemListRv.setControllerAndBuildModels(controller)
-        binding.itemListRv.addItemDecoration(DividerItemDecoration(requireContext(), RecyclerView.VERTICAL))
+        binding.itemListRv.addItemDecoration(
+            DividerItemDecoration(
+                requireContext(),
+                RecyclerView.VERTICAL
+            )
+        )
     }
 
     override fun onDestroyView() {
@@ -86,7 +91,7 @@ class MenuItemListFragment: BaseFragment() {
             .setView(binding.root)
             .setCancelable(false)
             .setPositiveButton("Добавить", null)
-                .setNegativeButton("Отмена") {dialog, pos ->
+            .setNegativeButton("Отмена") { dialog, _ ->
                 dialog.dismiss()
             }.create()
         dialog.setOnShowListener {

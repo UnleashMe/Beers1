@@ -1,5 +1,6 @@
 package com.example.neverpidor.model.beer
 
+// inner body
 data class Data(
     val UID: String = "",
     val alcPercentage: Double = 0.0,
