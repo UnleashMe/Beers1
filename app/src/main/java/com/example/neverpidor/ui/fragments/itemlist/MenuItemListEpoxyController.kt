@@ -16,7 +16,7 @@ import com.example.neverpidor.model.snack.SnackList
 import com.example.neverpidor.ui.epoxy.ViewBindingKotlinModel
 import kotlin.random.Random
 
-class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit) :
+class MenuItemListEpoxyController(val id: Int, val onEditClick: (String) -> Unit) :
     EpoxyController() {
 
     var isLoading = true
@@ -63,7 +63,7 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
                     }).id(map.key.hashCode()).addTo(this)
                     DividerEpoxy(R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
                     map.value.filter { it.type == isShown }.forEach {
-                        MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
+                        MenuItemEpoxyModel(it, id, onEditClick).id(it.UID).addTo(this)
                         DividerEpoxy(R.color.black).id(Random.nextDouble(100.0)).addTo(this)
                     }
                 }
@@ -75,7 +75,7 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
                     }).id(map.key.hashCode()).addTo(this)
                     DividerEpoxy(R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
                     map.value.filter { it.type == isShown }.forEach {
-                        MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
+                        MenuItemEpoxyModel(it, id, onEditClick).id(it.UID).addTo(this)
                         DividerEpoxy(R.color.black).id(Random.nextDouble(100.0)).addTo(this)
                     }
                 }
@@ -103,7 +103,7 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
         }
     }
 
-    data class MenuItemEpoxyModel(val data: com.example.neverpidor.model.beer.Data, val id: Int) :
+    data class MenuItemEpoxyModel(val data: com.example.neverpidor.model.beer.Data, val id: Int, val onEditClick: (String) -> Unit) :
         ViewBindingKotlinModel<ModelMenuItemBinding>(R.layout.model_menu_item) {
         override fun ModelMenuItemBinding.bind() {
             nameText.text = data.name
@@ -113,7 +113,7 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
             price.text = "${data.price} P."
             var closed: Boolean = true
             editImage.setOnClickListener {
-                // TODO:
+                onEditClick(data.UID)
             }
             root.setOnClickListener {
 

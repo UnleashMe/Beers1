@@ -14,11 +14,11 @@ import com.example.neverpidor.model.beer.BeerRequest
 import com.example.neverpidor.model.snack.SnackRequest
 import com.example.neverpidor.ui.fragments.BaseFragment
 
-class AddBeerFragment: BaseFragment() {
+class AddBeerFragment : BaseFragment() {
 
     private var _binding: AddBeerFragmentBinding? = null
     private val binding: AddBeerFragmentBinding
-    get() = _binding!!
+        get() = _binding!!
 
     private var updateMode = false
     private val viewModel: AddBeerViewModel by viewModels()
@@ -36,6 +36,10 @@ class AddBeerFragment: BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        args.itemId?.let {
+            activateUpdateMode()
+        }
 
         if (args.id == 1) {
             binding.volumeTextLayout.isGone = true
@@ -76,7 +80,12 @@ class AddBeerFragment: BaseFragment() {
             binding.typeTextLayout.error = "Так не пойдет"
             return
         }
-        val price = binding.priceEt.text.toString().toDouble()
+        val priceStr = binding.priceEt.text.toString()
+        if (priceStr.isEmpty()) {
+            binding.priceTextLayout.error = "Бесплатно только шлюхи в церкви"
+            return
+        }
+        val price = priceStr.toDouble()
         if (price < 50.0) {
             binding.priceTextLayout.error = "Хули тут так мало?"
             return
@@ -86,52 +95,85 @@ class AddBeerFragment: BaseFragment() {
             return
         }
         if (id == 0) {
-            val alcPercentage = binding.alcEt.text.toString().toDouble()
-            Log.e("ALC", alcPercentage.toString())
-            if (alcPercentage > 20.0) {
-                binding.alcTextLayout.error = "У нас здест не кабак"
+            val alcPercentageStr = binding.alcEt.text.toString()
+            if (alcPercentageStr.isEmpty()) {
+                binding.alcTextLayout.error = "Надо бы добавить хмелю"
                 return
             }
-            val volume = binding.volumeEt.text.toString().toDouble()
-            if (volume < 0.25) {
-                binding.volumeTextLayout.error = "Такими темпами не напьешься"
+            val alcPercentage = alcPercentageStr.toDouble()
+            if (alcPercentage > 20.0) {
+                binding.alcTextLayout.error = "У нас здесь не кабак"
                 return
+            }
+            val volumeStr = binding.volumeEt.text.toString()
+            if (volumeStr.isEmpty()) {
+                binding.volumeTextLayout.error = "???"
+                return
+            }
+            val volume = volumeStr.toDouble()
+            if (volume < 0.25) {
+                binding.volumeTextLayout.error = "Такими темпами не захмелеешь"
             }
             if (volume > 3.00) {
                 binding.volumeTextLayout.error = "Бочками пиво не продаем"
             }
             val beerRequest = BeerRequest(alcPercentage, description, name, price, type, volume)
-            viewModel.addBeer(beerRequest)
+            if (updateMode) {
+                viewModel.updateBeer(args.itemId!!, beerRequest)
+            } else {
+                viewModel.addBeer(beerRequest)
+            }
         } else {
             val request = SnackRequest(description, name, price, type)
-            viewModel.addSnack(request)
+            if (updateMode) {
+                viewModel.updateSnack(args.itemId!!, request)
+            } else {
+                viewModel.addSnack(request)
+            }
         }
-        navController.navigateUp()
+        navController.popBackStack()
     }
 
     private fun observeBeerResponse() {
         viewModel.beerResponse.observe(viewLifecycleOwner) {
-            if (it.isSuccessful) {
-                Toast.makeText(
-                    requireContext(),
-                    "${it.body()?.createdBeverage?.name} was successfully added",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG).show()
+            it.getContent()?.let {
+                Toast.makeText(requireContext(), it.msg, Toast.LENGTH_SHORT).show()
+                Log.e("Add", "${it.msg} ${it.createdBeverage.name}")
+            }
+
+        }
+    }
+
+    private fun observeSnackResponse() {
+        viewModel.snackResponse.observe(viewLifecycleOwner) {
+            it.getContent()?.let {
+                Toast.makeText(requireContext(), it.msg, Toast.LENGTH_SHORT).show()
             }
         }
     }
-    private fun observeSnackResponse() {
-        viewModel.snackResponse.observe(viewLifecycleOwner) {
-            if (it.isSuccessful) {
-                Toast.makeText(
-                    requireContext(),
-                    "${it.body()?.deletedSnack?.name} was successfully added",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG).show()
+
+    private fun activateUpdateMode() {
+        updateMode = true
+
+        activity?.actionBar?.title = "Cunt"
+        binding.saveButton.text = "Update"
+        if (args.id == 0) {
+            viewModel.getBeerById(args.itemId!!)
+            viewModel.beerLiveData.observe(viewLifecycleOwner) {
+                binding.nameEditText.setText(it.data.name)
+                binding.descriptionEt.setText(it.data.description)
+                binding.typeEt.setText(it.data.type)
+                binding.priceEt.setText(it.data.price.toString())
+                binding.alcEt.setText(it.data.alcPercentage.toString())
+                binding.volumeEt.setText(it.data.volume.toString())
+            }
+        } else {
+            viewModel.getSnackById(args.itemId!!)
+            viewModel.snackLiveData.observe(viewLifecycleOwner) {
+                binding.nameEditText.setText(it.data.name)
+                binding.descriptionEt.setText(it.data.description)
+                binding.typeEt.setText(it.data.type)
+                binding.priceEt.setText(it.data.price.toString())
             }
         }
     }

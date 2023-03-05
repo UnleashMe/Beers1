@@ -39,13 +39,14 @@ class MenuItemListFragment : BaseFragment() {
             val direction = MenuItemListFragmentDirections.actionMenuItemListFragmentToAddBeerFragment(args.itemId)
             navController.navigate(direction)
         }
-        val controller: MenuItemListEpoxyController
+        val controller = MenuItemListEpoxyController(args.itemId) {
+            val direction = MenuItemListFragmentDirections.actionMenuItemListFragmentToAddBeerFragment(args.itemId, it)
+            navController.navigate(direction)
+        }
 
         when (args.itemId) {
             0 -> {
-                controller = MenuItemListEpoxyController(args.itemId) {
-                    // TODO: stuff
-                }
+
                 viewModel.getBeers()
                 viewModel.beers.observe(viewLifecycleOwner) {
                     controller.beerList = it
@@ -53,9 +54,7 @@ class MenuItemListFragment : BaseFragment() {
                 observeBeerDeleteResponse()
             }
             else -> {
-                controller = MenuItemListEpoxyController(args.itemId) {
-                    // TODO: stuff
-                }
+
                 viewModel.getSnacks()
                 viewModel.snacks.observe(viewLifecycleOwner) {
                     controller.snacks = it
@@ -83,36 +82,19 @@ class MenuItemListFragment : BaseFragment() {
 
     private fun observeBeerDeleteResponse() {
         viewModel.beerResponse.observe(viewLifecycleOwner) {
+           viewModel.getBeers()
             it.getContent()?.let {
-                if (it.isSuccessful) {
-                    Toast.makeText(
-                        requireContext(),
-                        "${it.body()?.msg}, ${it.body()?.createdBeverage?.name}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG)
-                        .show()
-                }
+                Toast.makeText(requireContext(), "${it.msg}", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun observeSnackDeleteResponse() {
         viewModel.snackResponse.observe(viewLifecycleOwner) {
+            viewModel.getSnacks()
             it.getContent()?.let {
-                if (it.isSuccessful) {
-                    Toast.makeText(
-                        requireContext(),
-                        "${it.body()?.msg}, ${it.body()?.deletedSnack?.name}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG)
-                        .show()
-                }
+                Toast.makeText(requireContext(), it.msg, Toast.LENGTH_SHORT).show()
             }
-
         }
     }
     private fun addSwipeToDelete() {

@@ -7,6 +7,7 @@
     android:padding="8dp"
     android:background="@color/amber">
 
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/nameText"
         android:layout_width="wrap_content"

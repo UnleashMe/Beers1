@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.neverpidor.Event
 import com.example.neverpidor.data.MenuItemsRepository
 import com.example.neverpidor.model.beer.BeerList
-import com.example.neverpidor.model.beer.BeerPostResponse
-import com.example.neverpidor.model.snack.SnackDeleteResponse
+import com.example.neverpidor.model.beer.BeerResponse
+import com.example.neverpidor.model.snack.SnackResponse
 import com.example.neverpidor.model.snack.SnackList
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -23,11 +23,11 @@ class MenuItemListViewModel: ViewModel() {
     private val _beers = MutableLiveData<BeerList>()
     val beers: LiveData<BeerList> = _beers
 
-    private val _beerResponse = MutableLiveData<Event<Response<BeerPostResponse>>>()
-    val beerResponse: LiveData<Event<Response<BeerPostResponse>>> = _beerResponse
+    private val _beerResponse = MutableLiveData<Event<BeerResponse?>>()
+    val beerResponse: LiveData<Event<BeerResponse?>> = _beerResponse
 
-    private val _snackResponse = MutableLiveData<Event<Response<SnackDeleteResponse>>>()
-    val snackResponse: LiveData<Event<Response<SnackDeleteResponse>>> = _snackResponse
+    private val _snackResponse = MutableLiveData<Event<SnackResponse?>>()
+    val snackResponse: LiveData<Event<SnackResponse?>> = _snackResponse
 
     fun getSnacks() = viewModelScope.launch {
         _snacks.postValue(repository.getSnacks())
@@ -39,10 +39,10 @@ class MenuItemListViewModel: ViewModel() {
     }
     fun deleteBeer(beerId: String) = viewModelScope.launch {
         _beerResponse.postValue(Event(repository.deleteBeer(beerId)))
-        getBeers()
+
     }
     fun deleteSnack(snackId: String) = viewModelScope.launch {
         _snackResponse.postValue(Event(repository.deleteSnack(snackId)))
-        getSnacks()
+
     }
 }
