@@ -1,9 +1,6 @@
 package com.example.neverpidor.ui.fragments.itemlist
 
-import android.app.AlertDialog
-import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,13 +9,11 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import com.example.neverpidor.databinding.AddBeerDialogBinding
+import com.airbnb.epoxy.EpoxyTouchHelper
+import com.airbnb.epoxy.EpoxyTouchHelper.SwipeCallbacks
+import com.example.neverpidor.R
 import com.example.neverpidor.databinding.FragmentMenuItemListBinding
-import com.example.neverpidor.model.beer.BeerRequest
 import com.example.neverpidor.ui.fragments.BaseFragment
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MenuItemListFragment : BaseFragment() {
 
@@ -40,36 +35,36 @@ class MenuItemListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val controller = MenuItemListEpoxyController(args.itemId) {
-            showAddBeerDialog(it)
+        binding.fab.setOnClickListener {
+            val direction = MenuItemListFragmentDirections.actionMenuItemListFragmentToAddBeerFragment(args.itemId)
+            navController.navigate(direction)
         }
-        controller.isLoading = true
+        val controller: MenuItemListEpoxyController
+
         when (args.itemId) {
             0 -> {
+                controller = MenuItemListEpoxyController(args.itemId) {
+                    // TODO: stuff
+                }
                 viewModel.getBeers()
                 viewModel.beers.observe(viewLifecycleOwner) {
                     controller.beerList = it
                 }
+                observeBeerDeleteResponse()
             }
-            1 -> {
+            else -> {
+                controller = MenuItemListEpoxyController(args.itemId) {
+                    // TODO: stuff
+                }
                 viewModel.getSnacks()
                 viewModel.snacks.observe(viewLifecycleOwner) {
                     controller.snacks = it
                 }
+                observeSnackDeleteResponse()
             }
         }
-        viewModel.beerResponse.observe(viewLifecycleOwner) {
-            if (it.isSuccessful) {
-                Toast.makeText(
-                    requireContext(),
-                    "${it.body()?.msg}, ${it.body()?.createdBeverage?.name}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG).show()
-            }
 
-        }
+        controller.isLoading = true
         binding.itemListRv.setControllerAndBuildModels(controller)
         binding.itemListRv.addItemDecoration(
             DividerItemDecoration(
@@ -77,6 +72,8 @@ class MenuItemListFragment : BaseFragment() {
                 RecyclerView.VERTICAL
             )
         )
+        addSwipeToDelete()
+
     }
 
     override fun onDestroyView() {
@@ -84,58 +81,60 @@ class MenuItemListFragment : BaseFragment() {
         _binding = null
     }
 
-    private fun showAddBeerDialog(type: String) {
-        val binding = AddBeerDialogBinding.inflate(layoutInflater)
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Добавить пефко")
-            .setView(binding.root)
-            .setCancelable(false)
-            .setPositiveButton("Добавить", null)
-            .setNegativeButton("Отмена") { dialog, _ ->
-                dialog.dismiss()
-            }.create()
-        dialog.setOnShowListener {
-            binding.etName.requestFocus()
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                val name = binding.etName.text.toString()
-                if (name.isBlank()) {
-                    binding.etName.error = "Имя не может быть пустым"
-                    return@setOnClickListener
+    private fun observeBeerDeleteResponse() {
+        viewModel.beerResponse.observe(viewLifecycleOwner) {
+            it.getContent()?.let {
+                if (it.isSuccessful) {
+                    Toast.makeText(
+                        requireContext(),
+                        "${it.body()?.msg}, ${it.body()?.createdBeverage?.name}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG)
+                        .show()
                 }
-                val description = binding.etDescription.text.toString()
-                if (description.isBlank()) {
-                    binding.etDescription.error = "Придумай хоть что-нибудь"
-                    return@setOnClickListener
+            }
+        }
+    }
+
+    private fun observeSnackDeleteResponse() {
+        viewModel.snackResponse.observe(viewLifecycleOwner) {
+            it.getContent()?.let {
+                if (it.isSuccessful) {
+                    Toast.makeText(
+                        requireContext(),
+                        "${it.body()?.msg}, ${it.body()?.deletedSnack?.name}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Toast.makeText(requireContext(), it.errorBody().toString(), Toast.LENGTH_LONG)
+                        .show()
                 }
-                val price = binding.etPrice.text.toString().toDouble()
-                if (price < 50.0) {
-                    binding.etPrice.error = "Хули тут так мало?"
-                    return@setOnClickListener
-                }
-                if (price > 500.0) {
-                    binding.etPrice.error = "Чет дорого"
-                    return@setOnClickListener
-                }
-                val alcPercentage = binding.etAlc.text.toString().toDouble()
-                Log.e("ALC", alcPercentage.toString())
-                if (alcPercentage > 20.0) {
-                    binding.etAlc.error = "У нас здест не кабак"
-                    return@setOnClickListener
-                }
-                val volume = binding.etVolume.text.toString().toDouble()
-                if (volume < 0.25) {
-                    binding.etVolume.error = "Такими темпами не напьешься"
-                    return@setOnClickListener
-                }
-                if (volume > 3.00) {
-                    binding.etVolume.error = "Бочками пиво не продаем"
-                }
-                val beerRequest = BeerRequest(alcPercentage, description, name, price, type, volume)
-                viewModel.addBeer(beerRequest)
-                dialog.dismiss()
             }
 
         }
-        dialog.show()
     }
+    private fun addSwipeToDelete() {
+        EpoxyTouchHelper.initSwiping(binding.itemListRv)
+            .right()
+            .withTarget(MenuItemListEpoxyController.MenuItemEpoxyModel::class.java)
+            .andCallbacks(object :
+                SwipeCallbacks<MenuItemListEpoxyController.MenuItemEpoxyModel>() {
+                override fun onSwipeCompleted(
+                    model: MenuItemListEpoxyController.MenuItemEpoxyModel?,
+                    itemView: View?,
+                    position: Int,
+                    direction: Int
+                ) {
+                    val removedItemId = model?.data?.UID ?: return
+                    if (args.itemId == 0) {
+                        viewModel.deleteBeer(removedItemId)
+                    } else {
+                        viewModel.deleteSnack(removedItemId)
+                    }
+                }
+            })
+    }
+
 }

@@ -18,10 +18,10 @@
         tools:text="Омуль байкальский потр. 1кг" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/showDescImage"
+        android:id="@+id/editImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_baseline_open_in_full_24"
+        android:src="@drawable/ic_baseline_edit_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,7 +34,7 @@
         android:paddingBottom="8dp"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/showDescImage"
+        app:layout_constraintEnd_toStartOf="@+id/editImage"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="240 P." />
 
@@ -70,7 +70,7 @@
         android:textSize="16sp"
         android:textStyle="normal"
         android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="@+id/showDescImage"
+        app:layout_constraintEnd_toEndOf="@+id/editImage"
         app:layout_constraintTop_toBottomOf="@+id/description"
         tools:text="Объем 0.5 Л" />
 

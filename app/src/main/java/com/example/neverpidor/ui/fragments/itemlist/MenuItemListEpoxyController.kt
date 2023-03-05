@@ -60,9 +60,7 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
                 beerList.data.groupBy { it.type }.forEach { map ->
                     ItemTypeEpoxyModel(map.key, onTypeClick = { string ->
                         isShown = string
-                    }) {
-                        onAddClick(it)
-                    }.id(map.key.hashCode()).addTo(this)
+                    }).id(map.key.hashCode()).addTo(this)
                     DividerEpoxy(R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
                     map.value.filter { it.type == isShown }.forEach {
                         MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
@@ -74,9 +72,7 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
                 snacks.data.groupBy { it.type }.forEach { map ->
                     ItemTypeEpoxyModel(map.key, onTypeClick = { string ->
                         isShown = string
-                    }) {
-
-                    }.id(map.key.hashCode()).addTo(this)
+                    }).id(map.key.hashCode()).addTo(this)
                     DividerEpoxy(R.color.accent).id(Random.nextDouble(100.0)).addTo(this)
                     map.value.filter { it.type == isShown }.forEach {
                         MenuItemEpoxyModel(it, id).id(it.UID).addTo(this)
@@ -96,17 +92,13 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
 
     data class ItemTypeEpoxyModel(
         val type: String,
-        val onTypeClick: (String) -> Unit,
-        val onAddClick: (String) -> Unit
+        val onTypeClick: (String) -> Unit
     ) :
         ViewBindingKotlinModel<ModelItemTypeBinding>(R.layout.model_item_type) {
         override fun ModelItemTypeBinding.bind() {
             typeText.text = type
             root.setOnClickListener {
                 onTypeClick(type)
-            }
-            addImage.setOnClickListener {
-                onAddClick(type)
             }
         }
     }
@@ -116,12 +108,14 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
         override fun ModelMenuItemBinding.bind() {
             nameText.text = data.name
             description.isGone = true
-            showDescImage.setImageResource(R.drawable.ic_baseline_open_in_full_24)
             alcoholPercentageText.isGone = true
             volumeText.isGone = true
             price.text = "${data.price} P."
             var closed: Boolean = true
-            showDescImage.setOnClickListener {
+            editImage.setOnClickListener {
+                // TODO:
+            }
+            root.setOnClickListener {
 
                 if (closed) {
                     when (id) {
@@ -136,12 +130,10 @@ class MenuItemListEpoxyController(val id: Int, val onAddClick: (String) -> Unit)
                     description.isVisible = true
                     description.text = data.description
 
-                    showDescImage.setImageResource(R.drawable.ic_baseline_close_fullscreen_24)
                 } else {
                     description.isGone = true
                     alcoholPercentageText.isGone = true
                     volumeText.isGone = true
-                    showDescImage.setImageResource(R.drawable.ic_baseline_open_in_full_24)
                 }
                 closed = !closed
             }
